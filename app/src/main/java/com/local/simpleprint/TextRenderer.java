@@ -11,19 +11,18 @@ final class TextRenderer {
 	static final int WIDTH = 384;
 	private TextRenderer() {}
 
-	static byte[] render(String content, int textSize, boolean bold, boolean drawBorder) {
+	static Bitmap renderBitmap(String content, int textSize, boolean bold, boolean drawBorder) {
 		Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
 		text.setColor(Color.BLACK);
 		text.setTextSize(textSize);
 		text.setTypeface(bold ? android.graphics.Typeface.DEFAULT_BOLD : android.graphics.Typeface.DEFAULT);
-		List<String> lines = wrap(content, text, WIDTH - 48);
+		List<String> lines = wrap(content.isEmpty() ? " " : content, text, WIDTH - 48);
 		Paint.FontMetrics metrics = text.getFontMetrics();
 		int lineHeight = (int) Math.ceil(metrics.descent - metrics.ascent + textSize * 0.25f);
 		int height = Math.max(80, 40 + lines.size() * lineHeight);
 		Bitmap bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		canvas.drawColor(Color.WHITE);
-
 		if (drawBorder) {
 			Paint border = new Paint();
 			border.setColor(Color.BLACK);
@@ -31,22 +30,23 @@ final class TextRenderer {
 			border.setStrokeWidth(3f);
 			canvas.drawRect(12, 12, WIDTH - 13, height - 13, border);
 		}
-
 		float baseline = 20 - metrics.ascent;
 		for (String line : lines) {
 			canvas.drawText(line, 24, baseline, text);
 			baseline += lineHeight;
 		}
+		return bitmap;
+	}
 
-		byte[] pixels = new byte[WIDTH * height];
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < WIDTH; x++) {
+	static byte[] rasterize(Bitmap bitmap) {
+		byte[] pixels = new byte[bitmap.getWidth() * bitmap.getHeight()];
+		for (int y = 0; y < bitmap.getHeight(); y++) {
+			for (int x = 0; x < bitmap.getWidth(); x++) {
 				int color = bitmap.getPixel(x, y);
 				int luminance = (Color.red(color) * 299 + Color.green(color) * 587 + Color.blue(color) * 114) / 1000;
-				pixels[y * WIDTH + x] = (byte) (luminance < 160 ? 1 : 0);
+				pixels[y * bitmap.getWidth() + x] = (byte) (luminance < 160 ? 1 : 0);
 			}
 		}
-		bitmap.recycle();
 		return pixels;
 	}
 

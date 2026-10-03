@@ -8,7 +8,7 @@
 		android:label="Simple Print"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
-		<activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true">
+		<activity android:name=".MainActivity" android:screenOrientation="portrait" android:windowSoftInputMode="adjustResize" android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
