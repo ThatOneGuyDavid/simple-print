@@ -1,20 +1,18 @@
-# Simple Print 0.8
+# Simple Print 0.9
 
 Minimal, offline, Android 12+ text printing for the Mudita Kompakt and the
 X5H-2646. Package: `com.local.simpleprint`. No Internet permission or Google
 services. The basic Bluetooth protocol was verified by the owner on v0.1.
 
-## Changes in 0.8
+## Changes in 0.9
 
-- In 90° mode only, feeds an additional approximately 5 mm after the image
-  (39 blank raster rows at the reference profile’s 200 dpi), before the existing
-  final paper feed. Works with or without the printed border.
-- Reduced from the 15 mm added in v0.7 following the owner’s cutter-alignment test.
+- Removed the extra paper feed added for 90° mode. Both modes now use the
+  original v0.6 feed behavior again, following the owner's repeat-print feedback.
 - Retains the rounded-square SIMPLE PRINT icon from v0.7.
 
 ## Using it
 
-1. Install `SimplePrint-v0.8.apk`. If necessary, uninstall the older app from
+1. Install `SimplePrint-v0.9.apk`. If necessary, uninstall the older app from
    the phone shell with `pm uninstall --user 0 com.local.simpleprint`.
 2. Grant Nearby Devices/Bluetooth access and select a paired printer on the
    **Printer** tab. It is remembered.
@@ -57,11 +55,11 @@ Real-world darkness and long-print behavior still require a hardware test.
 
 ## Validation of this build
 
-The SDK build completed successfully. All 3,814 JVM checks passed, covering
-four-mode placement, fit/length limits, extra feed only in rotated mode, darkness/energy command values,
+The SDK build completed successfully. All 1,833 JVM checks passed, covering
+four-mode placement, fit/length limits, darkness/energy command values,
 packet checksums, and exact reconstruction of mixed raw/compressed raster rows.
 APK signature verification passed. The development signing key is unchanged.
-The manifest reports version 0.8 (code 8), Android 12 minimum, and only the
+The manifest reports version 0.9 (code 9), Android 12 minimum, and only the
 Bluetooth connection permission. The icon was visually inspected.
 
 Android UI/text drawing and actual printer output were not runtime-tested here.
@@ -84,7 +82,7 @@ ANDROID_SDK_ROOT=/path/to/android-sdk bash tools/build-sdk.sh
 Requires SDK platform 35, build-tools 35.0.0, Java, zip, keytool, and javac.
 If only a JRE is available, set `ECJ_JAR=/path/to/ecj-3.40.0.jar`.
 This script runs the JVM geometry/packet tests, compiles resources and classes,
-produces `SimplePrint-v0.8.apk`, and verifies its signature and manifest.
+produces `SimplePrint-v0.9.apk`, and verifies its signature and manifest.
 
 Signing keys are excluded from this public snapshot. Local builds use a developer-owned key.
 

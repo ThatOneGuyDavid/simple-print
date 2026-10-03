@@ -11,11 +11,9 @@ final class TinyPrinter {
 	private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int CHUNK_SIZE = 180;
 	private static final long CHUNK_DELAY_MS = 4;
-	// Reference profile: 200 dpi. 39 blank rows advance approximately 5 mm.
-	private static final int ROTATED_EXTRA_FEED_ROWS = Math.round(5f * 200f / 25.4f);
 
-	void print(BluetoothDevice device, byte[] pixels, int width, int height, boolean rotated) throws Exception {
-		byte[] job = buildJob(pixels, width, height, rotated);
+	void print(BluetoothDevice device, byte[] pixels, int width, int height) throws Exception {
+		byte[] job = buildJob(pixels, width, height);
 		try (BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID)) {
 			socket.connect();
 			OutputStream output = socket.getOutputStream();
@@ -28,7 +26,7 @@ final class TinyPrinter {
 		}
 	}
 
-	static byte[] buildJob(byte[] pixels, int width, int height, boolean rotated) {
+	static byte[] buildJob(byte[] pixels, int width, int height) {
 		if (width != 384 || height < 1 || (long) width * height != pixels.length) throw new IllegalArgumentException("Invalid raster");
 		ByteArrayOutputStream job = new ByteArrayOutputStream();
 		write(job, packet(0xA4, new byte[]{0x35})); // Maximum darkness: level 5
@@ -40,13 +38,6 @@ final class TinyPrinter {
 			byte[] raw = packLine(pixels, row * width, width);
 			write(job, rle.length <= raw.length ? packet(0xBF, rle) : packet(0xA2, raw));
 			if ((row + 1) % 200 == 0) write(job, packet(0xBD, new byte[]{0x0A}));
-		}
-		if (rotated) {
-			byte[] blankRow = packet(0xBF, rleLine(new byte[width], 0, width));
-			for (int row = 0; row < ROTATED_EXTRA_FEED_ROWS; row++) {
-				write(job, blankRow);
-				if ((height + row + 1) % 200 == 0) write(job, packet(0xBD, new byte[]{0x0A}));
-			}
 		}
 		write(job, packet(0xA1, new byte[]{(byte) 0x90, 0x00, 0x11}));
 		write(job, packet(0xA3, new byte[]{0x00}));
