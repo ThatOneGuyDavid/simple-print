@@ -1,3 +1,7 @@
+Simple Print
+Copyright 2026 Simple Print contributors
+Licensed under the Apache License, Version 2.0.
+
 The TinyPrint-family printer packet format in TinyPrinter.java was implemented with reference to:
 
 - TiMini-Print, Copyright its contributors, Apache License 2.0
@@ -15,3 +19,6 @@ Apache License 2.0 is included in licenses/Apache-2.0.txt.
 
 The launcher icon uses DejaVu Sans Bold glyph outlines.
 See licenses/DejaVu.txt for its copyright and permissive font license.
+
+The upstream tinyprint-x6h MIT license is included in licenses/tinyprint-x6h-MIT.txt.
+Gradle wrapper scripts/JAR retain Gradle upstream Apache-2.0 notices.

@@ -1,93 +1,127 @@
-# Simple Print 0.9
+# Simple Print
 
-Minimal, offline, Android 12+ text printing for the Mudita Kompakt and the
-X5H-2646. Package: `com.local.simpleprint`. No Internet permission or Google
-services. The basic Bluetooth protocol was verified by the owner on v0.1.
+A small, offline Android app for printing formatted text from a Mudita Kompakt
+to an X5H-2646 Bluetooth thermal printer. Type text, choose a printer, and print.
+No account, Internet access, advertising, analytics, or Google Play Services.
 
-## Changes in 0.9
+## Download and install
 
-- Removed the extra paper feed added for 90° mode. Both modes now use the
-  original v0.6 feed behavior again, following the owner's repeat-print feedback.
-- Retains the rounded-square SIMPLE PRINT icon from v0.7.
+Download **SimplePrint-v0.10.apk** from the [v0.10 release](https://github.com/ThatOneGuyDavid/simple-print/releases/tag/v0.10).
+The release includes a SHA-256 checksum. These are experimental development builds.
 
-## Using it
+1. Pair the printer in the phone's Bluetooth settings.
+2. Transfer the APK to the phone and install it through your APK installer or
+   Mudita Center. From a computer with ADB: `adb install -r SimplePrint-v0.10.apk`.
+3. Grant Nearby Devices/Bluetooth access. Select the printer on the **Printer** tab.
+4. Type on the **Print** tab and press **PRINT**. **HIDE KEYS** dismisses the keyboard.
 
-1. Install `SimplePrint-v0.9.apk`. If necessary, uninstall the older app from
-   the phone shell with `pm uninstall --user 0 com.local.simpleprint`.
-2. Grant Nearby Devices/Bluetooth access and select a paired printer on the
-   **Printer** tab. It is remembered.
-3. On **Print**, choose Small (24 pixels), Medium (32), or Large (42).
-   Large is the original Hello World size. Regular/Bold applies to new text.
-4. Type or paste. Existing text keeps its sizes/styles.
-5. Select Border and/or 90°, then press Print. Hide Keys dismisses the keyboard.
+The package is `com.local.simpleprint`. Published updates use the retained
+private development signing key. If a differently signed local build is installed,
+Android requires uninstalling it first. In a phone/WebADB shell, the command is:
 
-## Output modes
+```sh
+pm uninstall --user 0 com.local.simpleprint
+```
 
-| Mode | Line breaks | Position on paper |
+Uninstalling removes local settings. Do not prefix that phone-shell command
+with `adb` or with the shell prompt.
+
+## Features
+
+- Small, Medium, and Large text (24, 32, and 42 printer pixels).
+- Regular/Bold settings apply to new characters, allowing mixed formatting.
+- Optional rectangular border with equal padding around the text block.
+- Separate printer-selection tab; remembers the last paired printer.
+- Clockwise 90° printing with **manual line breaks only**.
+- Maximum darkness level 5/5; reference-profile energy 9500 and speed 10.
+- Black-and-white interface and a text launcher icon without an outline.
+
+| Mode | Line breaks | Position across the paper |
 | --- | --- | --- |
-| Normal + Border | Automatic wrapping and manual newlines | Bordered text block centered |
-| Normal, no border | Automatic wrapping and manual newlines | 8-pixel left margin |
-| 90° + Border | Manual newlines only | Complete block rotated clockwise and centered |
-| 90°, no border | Manual newlines only | Rotated block starts 8 pixels from the left edge |
+| Normal, border on | Automatic wrapping plus manual newlines | Bordered block centered |
+| Normal, border off | Automatic wrapping plus manual newlines | 8-pixel left margin |
+| 90°, border on | Manual newlines only | Rotated bordered block centered |
+| 90°, border off | Manual newlines only | Rotated block starts at an 8-pixel left margin |
 
-The text remains left-aligned inside its block before rotation. Border padding
-is 12 printer pixels on each side. The printhead is 384 pixels wide.
+Text stays left aligned inside its block before rotation. In 90° mode, a long
+line runs along the paper; the stack of manual lines must fit across the printhead.
+Both modes use the original final feed, with no extra feed for 90°.
 
-In 90° mode, the editor scrolls horizontally and does not wrap. Long text lines
-run along the paper feed direction after rotation. The stack of manually entered
-lines must fit across the 384-pixel printhead (including margins and border).
-Too many lines produces an explanation BEFORE Bluetooth connection or paper
-movement. The app never silently shrinks or crops the design.
+## Build
 
-The phone's editor displays formatting and a border indicator, but is not an
-exact paper-scale preview: screen width differs from printer width. It stays
-upright for editing in 90° mode; only the printed output rotates.
-
-Darkness is fixed at level 5/5. Energy is 9500, the value used by the public
-X6H/X5H profile, instead of the earlier app's 8000. The previously suggested
-11000 was not a verified model-specific limit and is not used.
-Speed remains 10. No claim of a manufacturer-verified thermal maximum is made.
-
-One raster job is limited to 16,384 rows to bound memory use on the phone
-(roughly two metres of paper at 200 dpi). Over-limit jobs are rejected with a
-message to split the print; this is not a wrap, crop, or scaling behavior.
-Real-world darkness and long-print behavior still require a hardware test.
-
-## Validation of this build
-
-The SDK build completed successfully. All 1,833 JVM checks passed, covering
-four-mode placement, fit/length limits, darkness/energy command values,
-packet checksums, and exact reconstruction of mixed raw/compressed raster rows.
-APK signature verification passed. The development signing key is unchanged.
-The manifest reports version 0.9 (code 9), Android 12 minimum, and only the
-Bluetooth connection permission. The icon was visually inspected.
-
-Android UI/text drawing and actual printer output were not runtime-tested here.
-Please check the new cutter alignment with a short 90° print on the Kompakt/X5H.
-
-## Build and test
-
-Android Studio / JDK 17 / Android SDK 35:
+Use JDK 17, Android SDK platform 35 and build-tools 35.0.0. The Gradle wrapper is
+included. SDK components and Gradle dependencies require downloads on first use.
 
 ```sh
 ./gradlew assembleDebug
 ```
 
-Or the dependency-light build path used for the delivered APK:
+Output: `app/build/outputs/apk/debug/app-debug.apk`. Android Studio can also open
+the project. Gradle uses your local Android debug key; no maintainer key is included.
+This Gradle path is provided but was not run during this release preparation.
+
+The dependency-light SDK build used and checked for the distributed APK is:
 
 ```sh
 ANDROID_SDK_ROOT=/path/to/android-sdk bash tools/build-sdk.sh
 ```
 
-Requires SDK platform 35, build-tools 35.0.0, Java, zip, keytool, and javac.
-If only a JRE is available, set `ECJ_JAR=/path/to/ecj-3.40.0.jar`.
-This script runs the JVM geometry/packet tests, compiles resources and classes,
-produces `SimplePrint-v0.9.apk`, and verifies its signature and manifest.
+It requires Bash, Java, `javac`, `keytool`, and `zip`. If only a JRE is installed,
+set `ECJ_JAR=/path/to/ecj-3.40.0.jar`. The script compiles resources and Java,
+runs existing JVM checks, produces `SimplePrint-v0.10.apk`, and verifies its
+signature and manifest. It creates or uses your local development key at
+`$HOME/.android/debug.keystore`. Maintainers set `SIMPLEPRINT_KEYSTORE` to a
+separately stored private key. Do not commit keystores or credentials.
 
-Signing keys are excluded from this public snapshot. Local builds use a developer-owned key.
+The icon is a VectorDrawable made from DejaVu Sans Bold glyph outlines. Optional
+regeneration requires Python and fontTools:
 
-Source map: MainActivity (UI), TextRenderer (mixed-style layouts and rotation),
-PrintGeometry (fit and placement), TinyPrinter (Bluetooth and protocol).
+```sh
+python3 tools/make_icon.py /path/to/DejaVuSans-Bold.ttf
+```
 
-The icon is a small vector asset. Regenerate with `python3 tools/make_icon.py
-/path/to/DejaVuSans-Bold.ttf` (fontTools required). Licenses are included.
+## Testing and limitations
+
+The owner confirmed printing on the Mudita Kompakt and X5H-2646 during development.
+The 15 mm and 5 mm extra-feed experiments were excessive in hardware tests and
+were removed in v0.9. See [TESTING.md](TESTING.md) for the validation record.
+
+- v0.10 was compiled and signed; 1,833 existing JVM checks passed. The launcher
+  border is removed; printing code is unchanged from v0.9. v0.10 has **not** been
+  tested on the phone, in Katapult, or with the physical printer.
+- Supports the tested printer's proprietary TinyPrint-family raster protocol
+  over Bluetooth Classic SPP. It is not a general ESC/POS or BLE printer app.
+- Requires Android 12/API 31 or newer and an already-paired Bluetooth device.
+- Fixed 384-pixel print width. Other models and firmware are not verified.
+- The editor shows formatting and a border indicator, but is not an exact
+  paper-scale preview. Screen wrapping can differ from printed wrapping.
+- Too many manual lines in 90° mode are rejected rather than cropped or scaled.
+  One job is capped at 16,384 raster rows (roughly two metres at 200 dpi).
+- Darkness/energy settings follow public protocol references, not a
+  manufacturer-certified thermal limit. Darkness and cutter alignment can vary.
+- “Sent to printer” means data was sent; the app cannot confirm a completed
+  physical print. There is no printer status/flow-control negotiation.
+- No saved document/history feature. Copy important text before leaving the app.
+- Editing inside an existing formatted span and complex scripts/emoji have not
+  received dedicated runtime testing.
+
+## Version history
+
+Every recovered version has a separate imported commit and version tag. This is
+a reconstructed history from saved snapshots, not original development commits.
+No original commit dates were invented. Source history starts at v0.2; v0.1 is
+preserved as its original APK only. Old binaries are unchanged, with hashes
+in `artifacts/`. Early APKs v0.1–v0.5 have no embedded version name/code, so their
+filenames identify the historical versions. Do not use them as upgrade targets.
+
+See [CHANGELOG.md](CHANGELOG.md). Signing keys and temporary files have been
+removed from **every** imported source snapshot.
+
+## License and attribution
+
+Simple Print is released under the [Apache License 2.0](LICENSE). Protocol work
+references [TiMini-Print](https://github.com/Dejniel/TiMini-Print) and
+[tinyprint-x6h](https://github.com/nazarovmi/tinyprint-x6h). The icon uses DejaVu
+Sans Bold. Upstream notices and license texts are in [NOTICE](NOTICE) and
+`licenses/`. Gradle wrapper files retain their upstream notices. This project is
+independent of Mudita, TinyPrint, and the printer manufacturer.
