@@ -12,6 +12,8 @@ This build prints simply formatted text to an already-paired X5H-family printer.
 6. Use **HIDE KEYS** whenever needed and tap the compact **PRINT** button.
 7. Use the Printer tab to change or refresh the paired printer.
 
+When Border is enabled, it is visible in the editor. The printed border is fitted around the formatted text with equal padding on every side. Text remains left-justified inside the border, while the complete bordered block is centered across the paper.
+
 ## Build
 
 Open this directory in Android Studio and use **Build > Build APK(s)**, or run:

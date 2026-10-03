@@ -18,13 +18,26 @@ final class TextRenderer {
 		TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.BLACK);
 		paint.setTextSize(32f);
-		int contentWidth = WIDTH - 48;
-		StaticLayout layout = StaticLayout.Builder.obtain(content, 0, content.length(), paint, contentWidth)
+		int maximumTextWidth = WIDTH - 48;
+		StaticLayout measuringLayout = StaticLayout.Builder.obtain(content, 0, content.length(), paint, maximumTextWidth)
 			.setAlignment(Layout.Alignment.ALIGN_NORMAL)
 			.setIncludePad(false)
 			.setLineSpacing(4f, 1f)
 			.build();
-		int height = Math.max(80, layout.getHeight() + 40);
+		float longestLine = 1f;
+		for (int line = 0; line < measuringLayout.getLineCount(); line++) {
+			longestLine = Math.max(longestLine, measuringLayout.getLineWidth(line));
+		}
+		int textWidth = Math.min(maximumTextWidth, Math.max(1, (int) Math.ceil(longestLine)));
+		StaticLayout layout = StaticLayout.Builder.obtain(content, 0, content.length(), paint, textWidth)
+			.setAlignment(Layout.Alignment.ALIGN_NORMAL)
+			.setIncludePad(false)
+			.setLineSpacing(4f, 1f)
+			.build();
+		int padding = 12;
+		int blockWidth = Math.min(WIDTH, textWidth + padding * 2);
+		int blockLeft = (WIDTH - blockWidth) / 2;
+		int height = Math.max(40, layout.getHeight() + padding * 2);
 		Bitmap bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		canvas.drawColor(Color.WHITE);
@@ -33,10 +46,12 @@ final class TextRenderer {
 			border.setColor(Color.BLACK);
 			border.setStyle(Paint.Style.STROKE);
 			border.setStrokeWidth(3f);
-			canvas.drawRect(12, 12, WIDTH - 13, height - 13, border);
+			float halfStroke = border.getStrokeWidth() / 2f;
+			canvas.drawRect(blockLeft + halfStroke, halfStroke,
+				blockLeft + blockWidth - halfStroke, height - halfStroke, border);
 		}
 		canvas.save();
-		canvas.translate(24, 20);
+		canvas.translate(blockLeft + padding, padding);
 		layout.draw(canvas);
 		canvas.restore();
 		return bitmap;

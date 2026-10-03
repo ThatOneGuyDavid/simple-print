@@ -71,6 +71,8 @@ public final class MainActivity extends Activity {
 		findViewById(R.id.hideKeyboardButton).setOnClickListener(view -> hideKeyboard());
 		findViewById(R.id.refreshPrintersButton).setOnClickListener(view -> loadPairedPrinters());
 		printButton.setOnClickListener(this::printText);
+		borderCheck.setOnCheckedChangeListener((button, checked) -> updateEditorBorder(checked));
+		updateEditorBorder(borderCheck.isChecked());
 		textInput.addTextChangedListener(new TextWatcher() {
 			@Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
 			@Override public void onTextChanged(CharSequence text, int start, int before, int count) {
@@ -116,6 +118,12 @@ public final class MainActivity extends Activity {
 		if (((RadioButton) findViewById(R.id.sizeSmall)).isChecked()) return 24;
 		if (((RadioButton) findViewById(R.id.sizeLarge)).isChecked()) return 42;
 		return 32;
+	}
+
+	private void updateEditorBorder(boolean visible) {
+		textInput.setBackgroundResource(visible ? R.drawable.editor_border : android.R.drawable.edit_text);
+		int padding = Math.round(12 * getResources().getDisplayMetrics().density);
+		textInput.setPadding(padding, padding, padding, padding);
 	}
 
 	private void showPrintPage() {

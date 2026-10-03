@@ -32,9 +32,9 @@
 		</LinearLayout>
 
 		<EditText android:id="@+id/textInput" android:layout_width="match_parent" android:layout_height="0dp"
-			android:layout_weight="1" android:background="#FFFFFF" android:gravity="top|start"
+			android:layout_weight="1" android:background="@drawable/editor_border" android:gravity="top|start"
 			android:hint="Type or paste formatted text here" android:inputType="textCapSentences|textMultiLine"
-			android:padding="16dp" android:scrollbars="vertical" android:textColor="#000000"
+			android:padding="12dp" android:scrollbars="vertical" android:textColor="#000000"
 			android:textColorHint="#555555" android:textSize="32px" />
 		<TextView android:id="@+id/statusText" android:layout_width="match_parent" android:layout_height="36dp"
 			android:gravity="center" android:text="Formatting applies to new text" android:textColor="#000000" android:textSize="15sp" />
