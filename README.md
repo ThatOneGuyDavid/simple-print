@@ -1,15 +1,15 @@
 # Simple Print proof of concept
 
-This build prints typed or pasted text to an already-paired X5H-family printer. The default Print tab includes a live preview, with printer selection kept on a separate Printer tab.
+This build prints simply formatted text to an already-paired X5H-family printer. The default Print tab is a single WYSIWYG editor; printer selection is kept on a separate Printer tab.
 
 ## On the phone
 
 1. Pair the printer in Android Bluetooth settings.
 2. Install the APK.
 3. Open **Simple Print** and grant the Bluetooth permission.
-4. On the default Print tab, enter text and choose Small/Medium/Large, Regular/Bold, and Border.
-5. Use **HIDE KEYBOARD** whenever needed and review the live preview.
-6. Tap the compact **PRINT** button beside the settings.
+4. Choose Small/Medium/Large and Regular/Bold, then type. Formatting applies only to newly entered or pasted characters, so one print can mix styles.
+5. Border applies to the complete print.
+6. Use **HIDE KEYS** whenever needed and tap the compact **PRINT** button.
 7. Use the Printer tab to change or refresh the paired printer.
 
 ## Build

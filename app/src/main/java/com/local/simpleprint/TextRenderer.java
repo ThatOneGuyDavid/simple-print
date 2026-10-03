@@ -4,22 +4,27 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import java.util.ArrayList;
-import java.util.List;
+import android.text.Layout;
+import android.text.SpannableString;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 
 final class TextRenderer {
 	static final int WIDTH = 384;
 	private TextRenderer() {}
 
-	static Bitmap renderBitmap(String content, int textSize, boolean bold, boolean drawBorder) {
-		Paint text = new Paint(Paint.ANTI_ALIAS_FLAG);
-		text.setColor(Color.BLACK);
-		text.setTextSize(textSize);
-		text.setTypeface(bold ? android.graphics.Typeface.DEFAULT_BOLD : android.graphics.Typeface.DEFAULT);
-		List<String> lines = wrap(content.isEmpty() ? " " : content, text, WIDTH - 48);
-		Paint.FontMetrics metrics = text.getFontMetrics();
-		int lineHeight = (int) Math.ceil(metrics.descent - metrics.ascent + textSize * 0.25f);
-		int height = Math.max(80, 40 + lines.size() * lineHeight);
+	static Bitmap renderBitmap(CharSequence formattedText, boolean drawBorder) {
+		SpannableString content = new SpannableString(formattedText.length() == 0 ? " " : formattedText);
+		TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+		paint.setColor(Color.BLACK);
+		paint.setTextSize(32f);
+		int contentWidth = WIDTH - 48;
+		StaticLayout layout = StaticLayout.Builder.obtain(content, 0, content.length(), paint, contentWidth)
+			.setAlignment(Layout.Alignment.ALIGN_NORMAL)
+			.setIncludePad(false)
+			.setLineSpacing(4f, 1f)
+			.build();
+		int height = Math.max(80, layout.getHeight() + 40);
 		Bitmap bitmap = Bitmap.createBitmap(WIDTH, height, Bitmap.Config.ARGB_8888);
 		Canvas canvas = new Canvas(bitmap);
 		canvas.drawColor(Color.WHITE);
@@ -30,11 +35,10 @@ final class TextRenderer {
 			border.setStrokeWidth(3f);
 			canvas.drawRect(12, 12, WIDTH - 13, height - 13, border);
 		}
-		float baseline = 20 - metrics.ascent;
-		for (String line : lines) {
-			canvas.drawText(line, 24, baseline, text);
-			baseline += lineHeight;
-		}
+		canvas.save();
+		canvas.translate(24, 20);
+		layout.draw(canvas);
+		canvas.restore();
 		return bitmap;
 	}
 
@@ -48,23 +52,5 @@ final class TextRenderer {
 			}
 		}
 		return pixels;
-	}
-
-	private static List<String> wrap(String content, Paint paint, int maxWidth) {
-		List<String> lines = new ArrayList<>();
-		String[] paragraphs = content.replace("\r", "").split("\n", -1);
-		for (String paragraph : paragraphs) {
-			if (paragraph.isEmpty()) { lines.add(""); continue; }
-			String remaining = paragraph;
-			while (!remaining.isEmpty()) {
-				int count = paint.breakText(remaining, true, maxWidth, null);
-				if (count >= remaining.length()) { lines.add(remaining); break; }
-				int split = remaining.lastIndexOf(' ', count);
-				if (split <= 0) split = count;
-				lines.add(remaining.substring(0, split).trim());
-				remaining = remaining.substring(split).trim();
-			}
-		}
-		return lines;
 	}
 }

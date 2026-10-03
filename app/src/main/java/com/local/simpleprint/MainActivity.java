@@ -8,9 +8,14 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -18,10 +23,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -36,50 +42,47 @@ public final class MainActivity extends Activity {
 	private final List<BluetoothDevice> devices = new ArrayList<>();
 	private final ExecutorService worker = Executors.newSingleThreadExecutor();
 	private Spinner printerSpinner;
-	private Spinner sizeSpinner;
-	private Spinner styleSpinner;
 	private Button printButton;
 	private TextView statusText;
 	private TextView printerDetails;
 	private EditText textInput;
 	private CheckBox borderCheck;
-	private ImageView previewImage;
+	private ToggleButton boldToggle;
 	private LinearLayout printPage;
 	private LinearLayout printerPage;
+	private boolean applyingFormat;
 
 	@Override
 	protected void onCreate(Bundle state) {
 		super.onCreate(state);
 		setContentView(R.layout.activity_main);
 		printerSpinner = findViewById(R.id.printerSpinner);
-		sizeSpinner = findViewById(R.id.sizeSpinner);
-		styleSpinner = findViewById(R.id.styleSpinner);
 		printButton = findViewById(R.id.printButton);
 		statusText = findViewById(R.id.statusText);
 		printerDetails = findViewById(R.id.printerDetails);
 		textInput = findViewById(R.id.textInput);
 		borderCheck = findViewById(R.id.borderCheck);
-		previewImage = findViewById(R.id.previewImage);
+		boldToggle = findViewById(R.id.boldToggle);
 		printPage = findViewById(R.id.printPage);
 		printerPage = findViewById(R.id.printerPage);
-
-		sizeSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-			new String[]{"Small", "Medium", "Large"}));
-		sizeSpinner.setSelection(1);
-		styleSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
-			new String[]{"Regular", "Bold"}));
 
 		findViewById(R.id.printTab).setOnClickListener(view -> showPrintPage());
 		findViewById(R.id.printerTab).setOnClickListener(view -> showPrinterPage());
 		findViewById(R.id.hideKeyboardButton).setOnClickListener(view -> hideKeyboard());
 		findViewById(R.id.refreshPrintersButton).setOnClickListener(view -> loadPairedPrinters());
 		printButton.setOnClickListener(this::printText);
-		borderCheck.setOnCheckedChangeListener((button, checked) -> updatePreview());
-		sizeSpinner.setOnItemSelectedListener(previewListener);
-		styleSpinner.setOnItemSelectedListener(previewListener);
 		textInput.addTextChangedListener(new TextWatcher() {
 			@Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
-			@Override public void onTextChanged(CharSequence text, int start, int before, int count) { updatePreview(); }
+			@Override public void onTextChanged(CharSequence text, int start, int before, int count) {
+				if (applyingFormat || count <= 0) return;
+				applyingFormat = true;
+				Editable editable = textInput.getText();
+				int end = Math.min(start + count, editable.length());
+				editable.setSpan(new AbsoluteSizeSpan(selectedTextSize(), false), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				editable.setSpan(new StyleSpan(boldToggle.isChecked() ? Typeface.BOLD : Typeface.NORMAL),
+					start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				applyingFormat = false;
+			}
 			@Override public void afterTextChanged(Editable text) {}
 		});
 		printerSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -94,7 +97,6 @@ public final class MainActivity extends Activity {
 		});
 
 		showPrintPage();
-		updatePreview();
 		if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
 			loadPairedPrinters();
 		} else {
@@ -102,19 +104,18 @@ public final class MainActivity extends Activity {
 		}
 	}
 
-	private final AdapterView.OnItemSelectedListener previewListener = new AdapterView.OnItemSelectedListener() {
-		@Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) { updatePreview(); }
-		@Override public void onNothingSelected(AdapterView<?> parent) {}
-	};
-
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
 		super.onRequestPermissionsResult(requestCode, permissions, results);
 		if (requestCode == BLUETOOTH_PERMISSION_REQUEST && results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
 			loadPairedPrinters();
-		} else {
-			showStatus("Bluetooth permission is required");
-		}
+		} else showStatus("Bluetooth permission is required");
+	}
+
+	private int selectedTextSize() {
+		if (((RadioButton) findViewById(R.id.sizeSmall)).isChecked()) return 24;
+		if (((RadioButton) findViewById(R.id.sizeLarge)).isChecked()) return 42;
+		return 32;
 	}
 
 	private void showPrintPage() {
@@ -134,28 +135,10 @@ public final class MainActivity extends Activity {
 		textInput.clearFocus();
 	}
 
-	private int selectedTextSize() {
-		switch (sizeSpinner.getSelectedItemPosition()) {
-			case 0: return 24;
-			case 2: return 42;
-			default: return 32;
-		}
-	}
-
-	private void updatePreview() {
-		if (previewImage == null || sizeSpinner == null || styleSpinner == null || borderCheck == null || textInput == null) return;
-		Bitmap preview = TextRenderer.renderBitmap(textInput.getText().toString(), selectedTextSize(),
-			styleSpinner.getSelectedItemPosition() == 1, borderCheck.isChecked());
-		previewImage.setImageBitmap(preview);
-	}
-
 	private void loadPairedPrinters() {
 		BluetoothManager manager = getSystemService(BluetoothManager.class);
 		BluetoothAdapter adapter = manager == null ? null : manager.getAdapter();
-		if (adapter == null || !adapter.isEnabled()) {
-			printerDetails.setText("Bluetooth is off");
-			return;
-		}
+		if (adapter == null || !adapter.isEnabled()) { printerDetails.setText("Bluetooth is off"); return; }
 		Set<BluetoothDevice> bonded = adapter.getBondedDevices();
 		devices.clear();
 		devices.addAll(bonded);
@@ -179,13 +162,11 @@ public final class MainActivity extends Activity {
 	}
 
 	private void printText(View ignored) {
-		String content = textInput.getText().toString().trim();
-		if (content.isEmpty()) { showStatus("Enter some text first"); return; }
+		if (textInput.getText().toString().trim().isEmpty()) { showStatus("Enter some text first"); return; }
 		int index = printerSpinner.getSelectedItemPosition();
 		if (index < 0 || index >= devices.size()) { showStatus("Choose a printer on the Printer tab"); return; }
 		BluetoothDevice device = devices.get(index);
-		int textSize = selectedTextSize();
-		boolean bold = styleSpinner.getSelectedItemPosition() == 1;
+		SpannableString formatted = new SpannableString(textInput.getText());
 		boolean border = borderCheck.isChecked();
 		hideKeyboard();
 		printButton.setEnabled(false);
@@ -193,7 +174,7 @@ public final class MainActivity extends Activity {
 		worker.execute(() -> {
 			Bitmap bitmap = null;
 			try {
-				bitmap = TextRenderer.renderBitmap(content, textSize, bold, border);
+				bitmap = TextRenderer.renderBitmap(formatted, border);
 				byte[] raster = TextRenderer.rasterize(bitmap);
 				new TinyPrinter().print(device, raster, bitmap.getWidth(), bitmap.getHeight());
 				runOnUiThread(() -> showStatus("Printed"));
@@ -208,10 +189,5 @@ public final class MainActivity extends Activity {
 	}
 
 	private void showStatus(String text) { statusText.setText(text); }
-
-	@Override
-	protected void onDestroy() {
-		worker.shutdownNow();
-		super.onDestroy();
-	}
+	@Override protected void onDestroy() { worker.shutdownNow(); super.onDestroy(); }
 }
