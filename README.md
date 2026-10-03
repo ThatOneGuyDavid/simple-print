@@ -1,29 +1,88 @@
-# Simple Print proof of concept
+# Simple Print 0.6
 
-This build prints simply formatted text to an already-paired X5H-family printer. The default Print tab is a single WYSIWYG editor; printer selection is kept on a separate Printer tab.
+Minimal, offline, Android 12+ text printing for the Mudita Kompakt and the
+X5H-2646. Package: `com.local.simpleprint`. No Internet permission or Google
+services. The basic Bluetooth protocol was verified by the owner on v0.1.
 
-## On the phone
+## Using it
 
-1. Pair the printer in Android Bluetooth settings.
-2. Install the APK.
-3. Open **Simple Print** and grant the Bluetooth permission.
-4. Choose Small/Medium/Large and Regular/Bold, then type. Formatting applies only to newly entered or pasted characters, so one print can mix styles.
-5. Border applies to the complete print.
-6. Use **HIDE KEYS** whenever needed and tap the compact **PRINT** button.
-7. Use the Printer tab to change or refresh the paired printer.
+1. Install `SimplePrint-v0.6.apk`. If necessary, uninstall the older app from
+   the phone shell with `pm uninstall --user 0 com.local.simpleprint`.
+2. Grant Nearby Devices/Bluetooth access and select a paired printer on the
+   **Printer** tab. It is remembered.
+3. On **Print**, choose Small (24 pixels), Medium (32), or Large (42).
+   Large is the original Hello World size. Regular/Bold applies to new text.
+4. Type or paste. Existing text keeps its sizes/styles.
+5. Select Border and/or 90°, then press Print. Hide Keys dismisses the keyboard.
 
-When Border is enabled, it is visible in the editor. The printed border is fitted around the formatted text with equal padding on every side. Text remains left-justified inside the border, while the complete bordered block is centered across the paper.
+## Output modes
 
-## Build
+| Mode | Line breaks | Position on paper |
+| --- | --- | --- |
+| Normal + Border | Automatic wrapping and manual newlines | Bordered text block centered |
+| Normal, no border | Automatic wrapping and manual newlines | 8-pixel left margin |
+| 90° + Border | Manual newlines only | Complete block rotated clockwise and centered |
+| 90°, no border | Manual newlines only | Rotated block starts 8 pixels from the left edge |
 
-Open this directory in Android Studio and use **Build > Build APK(s)**, or run:
+The text remains left-aligned inside its block before rotation. Border padding
+is 12 printer pixels on each side. The printhead is 384 pixels wide.
+
+In 90° mode, the editor scrolls horizontally and does not wrap. Long text lines
+run along the paper feed direction after rotation. The stack of manually entered
+lines must fit across the 384-pixel printhead (including margins and border).
+Too many lines produces an explanation BEFORE Bluetooth connection or paper
+movement. The app never silently shrinks or crops the design.
+
+The phone's editor displays formatting and a border indicator, but is not an
+exact paper-scale preview: screen width differs from printer width. It stays
+upright for editing in 90° mode; only the printed output rotates.
+
+Darkness is fixed at level 5/5. Energy is 9500, the value used by the public
+X6H/X5H profile, instead of the earlier app's 8000. The previously suggested
+11000 was not a verified model-specific limit and is not used.
+Speed remains 10. No claim of a manufacturer-verified thermal maximum is made.
+
+One raster job is limited to 16,384 rows to bound memory use on the phone
+(roughly two metres of paper at 200 dpi). Over-limit jobs are rejected with a
+message to split the print; this is not a wrap, crop, or scaling behavior.
+Real-world darkness and long-print behavior still require a hardware test.
+
+## Validation of this build
+
+The SDK build completed successfully. All 1,833 JVM checks passed, covering
+four-mode placement, fit/length limits, darkness/energy command values,
+packet checksums, and exact reconstruction of mixed raw/compressed raster rows.
+APK signature verification passed, and the signing certificate matches v0.5.
+The manifest reports version 0.6 (code 6), Android 12 minimum, and only the
+Bluetooth connection permission. The icon was visually inspected.
+
+Android UI/text drawing and actual printer output were not runtime-tested here.
+Please test a short print in each of the four modes on the Kompakt/X5H before
+trying a long job.
+
+## Build and test
+
+Android Studio / JDK 17 / Android SDK 35:
 
 ```sh
 ./gradlew assembleDebug
 ```
 
-The APK is produced at `app/build/outputs/apk/debug/app-debug.apk`.
+Or the dependency-light build path used for the delivered APK:
 
-## Protocol basis
+```sh
+ANDROID_SDK_ROOT=/path/to/android-sdk bash tools/build-sdk.sh
+```
 
-The printer job uses the public TinyPrint-family command format: 384-pixel monochrome raster rows, Tiny RLE/raw line packets, CRC-8 framing, and Bluetooth Classic SPP. Protocol implementation is isolated in `TinyPrinter.java` so results from the first printer test can be applied without changing the UI or renderer.
+Requires SDK platform 35, build-tools 35.0.0, Java, zip, keytool, and javac.
+If only a JRE is available, set `ECJ_JAR=/path/to/ecj-3.40.0.jar`.
+This script runs the JVM geometry/packet tests, compiles resources and classes,
+produces `SimplePrint-v0.6.apk`, and verifies its signature and manifest.
+
+Signing keys are excluded from this public snapshot. Local builds use a developer-owned key.
+
+Source map: MainActivity (UI), TextRenderer (mixed-style layouts and rotation),
+PrintGeometry (fit and placement), TinyPrinter (Bluetooth and protocol).
+
+The icon is a small vector asset. Regenerate with `python3 tools/make_icon.py
+/path/to/DejaVuSans-Bold.ttf` (fontTools required). Licenses are included.

@@ -47,6 +47,7 @@ public final class MainActivity extends Activity {
 	private TextView printerDetails;
 	private EditText textInput;
 	private CheckBox borderCheck;
+	private CheckBox rotateCheck;
 	private ToggleButton boldToggle;
 	private LinearLayout printPage;
 	private LinearLayout printerPage;
@@ -62,6 +63,7 @@ public final class MainActivity extends Activity {
 		printerDetails = findViewById(R.id.printerDetails);
 		textInput = findViewById(R.id.textInput);
 		borderCheck = findViewById(R.id.borderCheck);
+		rotateCheck = findViewById(R.id.rotateCheck);
 		boldToggle = findViewById(R.id.boldToggle);
 		printPage = findViewById(R.id.printPage);
 		printerPage = findViewById(R.id.printerPage);
@@ -73,6 +75,12 @@ public final class MainActivity extends Activity {
 		printButton.setOnClickListener(this::printText);
 		borderCheck.setOnCheckedChangeListener((button, checked) -> updateEditorBorder(checked));
 		updateEditorBorder(borderCheck.isChecked());
+		rotateCheck.setOnCheckedChangeListener((button, checked) -> {
+			textInput.setHorizontallyScrolling(checked);
+			textInput.setHorizontalScrollBarEnabled(checked);
+			textInput.requestLayout();
+			showStatus(checked ? "90°: Enter for new line; swipe for long lines" : "Normal: automatic wrapping");
+		});
 		textInput.addTextChangedListener(new TextWatcher() {
 			@Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
 			@Override public void onTextChanged(CharSequence text, int start, int before, int count) {
@@ -121,7 +129,8 @@ public final class MainActivity extends Activity {
 	}
 
 	private void updateEditorBorder(boolean visible) {
-		textInput.setBackgroundResource(visible ? R.drawable.editor_border : android.R.drawable.edit_text);
+		if (visible) textInput.setBackgroundResource(R.drawable.editor_border);
+		else textInput.setBackgroundColor(android.graphics.Color.WHITE);
 		int padding = Math.round(12 * getResources().getDisplayMetrics().density);
 		textInput.setPadding(padding, padding, padding, padding);
 	}
@@ -144,6 +153,10 @@ public final class MainActivity extends Activity {
 	}
 
 	private void loadPairedPrinters() {
+		if (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, BLUETOOTH_PERMISSION_REQUEST);
+			return;
+		}
 		BluetoothManager manager = getSystemService(BluetoothManager.class);
 		BluetoothAdapter adapter = manager == null ? null : manager.getAdapter();
 		if (adapter == null || !adapter.isEnabled()) { printerDetails.setText("Bluetooth is off"); return; }
@@ -166,7 +179,7 @@ public final class MainActivity extends Activity {
 
 	private String safeName(BluetoothDevice device) {
 		String name = device.getName();
-		return name == null || name.isBlank() ? device.getAddress() : name;
+		return name == null || name.trim().isEmpty() ? device.getAddress() : name;
 	}
 
 	private void printText(View ignored) {
@@ -174,21 +187,26 @@ public final class MainActivity extends Activity {
 		int index = printerSpinner.getSelectedItemPosition();
 		if (index < 0 || index >= devices.size()) { showStatus("Choose a printer on the Printer tab"); return; }
 		BluetoothDevice device = devices.get(index);
-		SpannableString formatted = new SpannableString(textInput.getText());
+		SpannableString formatted = TextRenderer.snapshot(textInput.getText());
 		boolean border = borderCheck.isChecked();
+		boolean rotated = rotateCheck.isChecked();
 		hideKeyboard();
 		printButton.setEnabled(false);
 		showStatus("Printing...");
 		worker.execute(() -> {
 			Bitmap bitmap = null;
 			try {
-				bitmap = TextRenderer.renderBitmap(formatted, border);
+				bitmap = TextRenderer.renderBitmap(formatted, border, rotated);
 				byte[] raster = TextRenderer.rasterize(bitmap);
 				new TinyPrinter().print(device, raster, bitmap.getWidth(), bitmap.getHeight());
-				runOnUiThread(() -> showStatus("Printed"));
+				runOnUiThread(() -> showStatus("Sent to printer"));
 			} catch (Exception error) {
 				android.util.Log.e("SimplePrint", "Print failed", error);
-				runOnUiThread(() -> showStatus("Failed: " + error.getClass().getSimpleName()));
+				String message = error instanceof IllegalArgumentException ? error.getMessage()
+					: "Failed: " + error.getClass().getSimpleName();
+				runOnUiThread(() -> new android.app.AlertDialog.Builder(this)
+					.setTitle("Unable to print").setMessage(message).setPositiveButton("OK", null).show());
+				runOnUiThread(() -> showStatus("Not printed"));
 			} finally {
 				if (bitmap != null) bitmap.recycle();
 				runOnUiThread(() -> printButton.setEnabled(true));

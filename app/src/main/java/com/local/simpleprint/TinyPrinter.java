@@ -27,16 +27,17 @@ final class TinyPrinter {
 	}
 
 	static byte[] buildJob(byte[] pixels, int width, int height) {
-		if (width % 8 != 0 || pixels.length != width * height) throw new IllegalArgumentException("Invalid raster");
+		if (width != 384 || height < 1 || (long) width * height != pixels.length) throw new IllegalArgumentException("Invalid raster");
 		ByteArrayOutputStream job = new ByteArrayOutputStream();
-		write(job, packet(0xA4, new byte[]{0x33}));
-		write(job, packet(0xAF, new byte[]{0x40, 0x1F})); // 8000, little endian
+		write(job, packet(0xA4, new byte[]{0x35})); // Maximum darkness: level 5
+		write(job, packet(0xAF, new byte[]{0x1C, 0x25})); // 9500: X6H/X5H reference profile
 		write(job, packet(0xBE, new byte[]{0x01}));
 		write(job, packet(0xBD, new byte[]{0x0A}));
 		for (int row = 0; row < height; row++) {
 			byte[] rle = rleLine(pixels, row * width, width);
 			byte[] raw = packLine(pixels, row * width, width);
 			write(job, rle.length <= raw.length ? packet(0xBF, rle) : packet(0xA2, raw));
+			if ((row + 1) % 200 == 0) write(job, packet(0xBD, new byte[]{0x0A}));
 		}
 		write(job, packet(0xA1, new byte[]{(byte) 0x90, 0x00, 0x11}));
 		write(job, packet(0xA3, new byte[]{0x00}));

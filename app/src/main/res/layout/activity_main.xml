@@ -17,6 +17,8 @@
 				android:layout_weight="1" android:checked="true" android:text="Medium" />
 			<RadioButton android:id="@+id/sizeLarge" android:layout_width="0dp" android:layout_height="46dp"
 				android:layout_weight="1" android:text="Large" />
+			<CheckBox android:id="@+id/rotateCheck" android:layout_width="wrap_content" android:layout_height="46dp"
+				android:text="90°" android:contentDescription="Rotate print 90 degrees clockwise; manual line breaks" />
 		</RadioGroup>
 
 		<LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
