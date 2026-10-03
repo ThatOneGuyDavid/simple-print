@@ -11,8 +11,8 @@ final class TinyPrinter {
 	private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	private static final int CHUNK_SIZE = 180;
 	private static final long CHUNK_DELAY_MS = 4;
-	// Reference profile: 200 dpi. 118 blank rows advance approximately 15 mm.
-	private static final int ROTATED_EXTRA_FEED_ROWS = Math.round(15f * 200f / 25.4f);
+	// Reference profile: 200 dpi. 39 blank rows advance approximately 5 mm.
+	private static final int ROTATED_EXTRA_FEED_ROWS = Math.round(5f * 200f / 25.4f);
 
 	void print(BluetoothDevice device, byte[] pixels, int width, int height, boolean rotated) throws Exception {
 		byte[] job = buildJob(pixels, width, height, rotated);

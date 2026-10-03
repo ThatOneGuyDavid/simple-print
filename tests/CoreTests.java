@@ -75,11 +75,11 @@ public final class CoreTests {
 					check(Arrays.equals(decoded, expected), "image preserved, extra feed completely white");
 					rows++;
 				}
-				if (opcode == 0xA1) check(rows == (rotated ? 569 : 451), "extra feed precedes existing final feed");
+				if (opcode == 0xA1) check(rows == (rotated ? 490 : 451), "extra feed precedes existing final feed");
 				offset += size + 8;
 			}
-			check(rows == (rotated ? 569 : 451) && speeds == 3 && rawRows > 0 && rleRows > 0,
-				"exact 118 extra rows only in rotated mode, complete job including periodic speed");
+			check(rows == (rotated ? 490 : 451) && speeds == 3 && rawRows > 0 && rleRows > 0,
+				"exact 39 extra rows only in rotated mode, complete job including periodic speed");
 		}
 		System.out.println("PASS: " + checks + " geometry, limit, CRC, darkness and raster checks");
 	}
