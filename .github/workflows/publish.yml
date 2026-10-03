@@ -1,0 +1,23 @@
+name: Publish preserved APK releases
+on:
+  push:
+    branches: [main]
+    paths:
+      - release-manifest.json
+      - .github/workflows/publish.yml
+      - tools/publish_releases.py
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-preserved-releases
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish tags and original APK assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/publish_releases.py

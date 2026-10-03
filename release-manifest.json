@@ -1,0 +1,52 @@
+[
+  {
+    "version": "0.1",
+    "commit": "60f934c90b7aa1d56926e3c0e15bebb071712334",
+    "notes": "Original Hello World proof of concept. Owner confirmed successful printing. Original source is unavailable; this tag preserves the original APK only.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits. Early APK has no embedded version name/code; archive filename identifies the version."
+  },
+  {
+    "version": "0.2",
+    "commit": "77c555c9df47a6aed22c03805bbe96c2d65fbe17",
+    "notes": "Three text sizes, regular/bold, optional border.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits. Early APK has no embedded version name/code; archive filename identifies the version."
+  },
+  {
+    "version": "0.3",
+    "commit": "550ef0c68f9428599d39828baeb1f1de1cbe7886",
+    "notes": "Print and Printer tabs, preview and hide-keyboard control.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits. Early APK has no embedded version name/code; archive filename identifies the version."
+  },
+  {
+    "version": "0.4",
+    "commit": "edba05ef81817d5fc76919f28257bc83ebf291d1",
+    "notes": "Single mixed-format editor; settings affect newly entered characters.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits. Early APK has no embedded version name/code; archive filename identifies the version."
+  },
+  {
+    "version": "0.5",
+    "commit": "11eebaf802fa7cdf74c873bb3e6e0383e36e8357",
+    "notes": "Border indicator, equal padding and centered bordered text block.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits. Early APK has no embedded version name/code; archive filename identifies the version."
+  },
+  {
+    "version": "0.6",
+    "commit": "b2d606029a734028dcd975dd70a7c2bcd0ec659a",
+    "notes": "Darkness 5/5, energy 9500, border-dependent placement, manual-wrap 90-degree mode and text icon.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits."
+  },
+  {
+    "version": "0.7",
+    "commit": "80d0f22cfc21995a5b700951c143f86675a708cc",
+    "notes": "Rounded icon and extra 15 mm rotated feed. Historical experiment: extra feed proved excessive on hardware.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits."
+  },
+  {
+    "version": "0.8",
+    "commit": "18c809a5af6e532e3c0353ea84704ef12e4a212f",
+    "notes": "Extra rotated feed reduced to 5 mm. Historical experiment: still excessive on hardware.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits."
+  },
+  {
+    "version": "0.9",
+    "commit": "63e12ea56342ac8cfe7a7906c41d3419ee761b84",
+    "notes": "Removed added rotated feed, restoring v0.6 printer protocol behavior. No final cutter-alignment confirmation recorded.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits."
+  },
+  {
+    "version": "0.10",
+    "commit": "8f7aaaf2cadaca0f5dc4b9fb3f53d2a90115e2ed",
+    "notes": "Launcher outline removed for use with Katapult. All Java printing/UI source is unchanged from v0.9. SDK build and 1,833 existing JVM checks passed; APK signature and manifest verified. No v0.10 phone, Katapult, or printer test was performed.\n\nExperimental development APK for Android 12+, Mudita Kompakt and X5H-2646. SHA256SUMS is included. Signing keys are excluded from all source history. This is an archival import of saved development snapshots, not original development commits."
+  }
+]
