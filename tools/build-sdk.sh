@@ -11,7 +11,7 @@ mkdir -p "$out/gen" "$out/classes" "$out/dex" "$out/tests"
 sed 's/<manifest xmlns:android=/<manifest package="com.local.simpleprint" xmlns:android=/' app/src/main/AndroidManifest.xml > "$out/AndroidManifest.xml"
 "$sdk_tools/aapt2" compile --dir app/src/main/res -o "$out/resources.zip"
 "$sdk_tools/aapt2" link -o "$out/base.apk" -I "$android_jar" --manifest "$out/AndroidManifest.xml" \
-	--java "$out/gen" --min-sdk-version 31 --target-sdk-version 35 --version-code 6 --version-name 0.6 "$out/resources.zip"
+	--java "$out/gen" --min-sdk-version 31 --target-sdk-version 35 --version-code 7 --version-name 0.7 "$out/resources.zip"
 mapfile -t sources < <(find app/src/main/java "$out/gen" -name '*.java')
 if [[ -n "${ECJ_JAR:-}" ]]; then
 	java -jar "$ECJ_JAR" -8 -cp "$android_jar" -d "$out/classes" "${sources[@]}"
@@ -34,6 +34,6 @@ if [[ ! -f "$key" ]]; then
 		-dname 'CN=Android Debug,O=Android,C=US' -keyalg RSA -keysize 2048 -validity 10000
 fi
 "$sdk_tools/apksigner" sign --ks "$key" --ks-pass pass:android --key-pass pass:android \
-	--out "$PWD/SimplePrint-v0.6.apk" "$out/aligned.apk"
-"$sdk_tools/apksigner" verify --verbose "$PWD/SimplePrint-v0.6.apk"
-"$sdk_tools/aapt2" dump badging "$PWD/SimplePrint-v0.6.apk"
+	--out "$PWD/SimplePrint-v0.7.apk" "$out/aligned.apk"
+"$sdk_tools/apksigner" verify --verbose "$PWD/SimplePrint-v0.7.apk"
+"$sdk_tools/aapt2" dump badging "$PWD/SimplePrint-v0.7.apk"

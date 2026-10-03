@@ -198,7 +198,7 @@ public final class MainActivity extends Activity {
 			try {
 				bitmap = TextRenderer.renderBitmap(formatted, border, rotated);
 				byte[] raster = TextRenderer.rasterize(bitmap);
-				new TinyPrinter().print(device, raster, bitmap.getWidth(), bitmap.getHeight());
+				new TinyPrinter().print(device, raster, bitmap.getWidth(), bitmap.getHeight(), rotated);
 				runOnUiThread(() -> showStatus("Sent to printer"));
 			} catch (Exception error) {
 				android.util.Log.e("SimplePrint", "Print failed", error);

@@ -25,12 +25,13 @@ for word, baseline in [("SIMPLE", 47), ("PRINT", 73)]:
         paths.append(pen.getCommands())
         x += glyphs[name].width * scale
 outline = " ".join(paths)
+border = "M28,8 H80 Q100,8 100,28 V80 Q100,100 80,100 H28 Q8,100 8,80 V28 Q8,8 28,8 Z"
 vector = f'''<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
     <path android:fillColor="#FFFFFF" android:pathData="M0,0 H108 V108 H0 Z" />
     <path android:fillColor="#00000000" android:strokeColor="#000000" android:strokeWidth="1.5"
-        android:pathData="M8,8 H100 V100 H8 Z" />
+        android:pathData="{border}" />
     <path android:fillColor="#000000" android:pathData="{outline}" />
 </vector>
 '''
@@ -38,5 +39,5 @@ root = Path(__file__).resolve().parent.parent
 (root / "app/src/main/res/drawable/ic_launcher.xml").write_text(vector)
 if args.preview:
     import cairosvg
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="324" height="324" viewBox="0 0 108 108"><rect width="108" height="108" fill="white"/><rect x="8" y="8" width="92" height="92" fill="none" stroke="black" stroke-width="1.5"/><path d="{outline}"/></svg>'
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="324" height="324" viewBox="0 0 108 108"><rect width="108" height="108" fill="white"/><path d="{border}" fill="none" stroke="black" stroke-width="1.5"/><path d="{outline}"/></svg>'
     cairosvg.svg2png(bytestring=svg.encode(), write_to=args.preview)
