@@ -1,0 +1,17 @@
+The TinyPrint-family printer packet format in TinyPrinter.java was implemented with reference to:
+
+- TiMini-Print, Copyright its contributors, Apache License 2.0
+  https://github.com/Dejniel/TiMini-Print
+- tinyprint-x6h, Copyright (c) 2025 Maksim Nazarov, MIT License
+  https://github.com/nazarovmi/tinyprint-x6h
+
+No source files from either project are bundled verbatim.
+
+Version 0.6 adaptations: maximum darkness level, X6H-profile energy value,
+and periodic speed commands for long raster streams.
+TiMini-Print reference: Copyright 2026 Daniel Banecki.
+Reference commit: abc5ec15b51d64d018933a5be98426f2c10f48d8.
+Apache License 2.0 is included in licenses/Apache-2.0.txt.
+
+The launcher icon uses DejaVu Sans Bold glyph outlines.
+See licenses/DejaVu.txt for its copyright and permissive font license.

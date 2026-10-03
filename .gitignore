@@ -1,0 +1,15 @@
+.gradle/
+local.properties
+build/
+app/build/
+build-sdk-*/
+signing/
+*.keystore
+*.jks
+*.p12
+*.pem
+*.idsig
+*.apk
+!artifacts/**/*.apk
+.env
+.env.*
